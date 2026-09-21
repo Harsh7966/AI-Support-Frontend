@@ -3,7 +3,7 @@ import axiosInstance from "./axios";
 interface AuthRequest {
     email: string;
     password: string;
-    role: string;
+    role?: string;
 }
 
 export interface AuthResponse {
@@ -17,6 +17,5 @@ export const authUser= async(data: AuthRequest):Promise<AuthResponse> =>{
         "/auth",
         data
     )
-    console.log(response, "PPPPP");
     return response.data;
 }

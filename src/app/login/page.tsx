@@ -2,11 +2,65 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { authUser } from "@/services/authService";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation"
+import { jwtDecode } from "jwt-decode";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "@/store/authSlice";
+
+interface JwtPayload {
+    userId: string;
+    email: string;
+    role: string;
+}
 
 export default function LoginPage() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const router = useRouter();
+    const dispatch = useDispatch();
+    const [loginDetails, setLoginDetails] = useState({
+        email: "",
+        password: ""
+    });
     const [showPassword, setShowPassword] = useState(false);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+
+        setLoginDetails((prev) => ({
+            ...prev,
+            [name]: value
+        }))
+    }
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        try {
+            e.preventDefault();
+            const res = await authUser(loginDetails);
+            if (res.status === true && res.jwt) {
+                const decodeToken = jwtDecode<JwtPayload>(res.jwt);
+                localStorage.setItem("token", res.jwt);
+                // Store user information in Redux
+                dispatch(
+                    loginSuccess({
+                        user: {
+                            _id: decodeToken.userId,
+                            email: decodeToken.email,
+                            role: decodeToken.role,
+                        },
+                        token: res.jwt,
+                    })
+                );
+                if (decodeToken.role === "user") router.push("/user");
+                if (decodeToken.role === "agent") router.push("/agent");
+                if (decodeToken.role === "admin") router.push("/admin");
+                toast.success(res.msg);
+            };
+            if (res.status === false) toast.error(res.msg);
+        } catch (err) {
+            console.log(err);
+        }
+    }
 
     return (
         <main className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-10 relative overflow-hidden">
@@ -49,7 +103,7 @@ export default function LoginPage() {
                         </p>
                     </div>
 
-                    <form className="space-y-5">
+                    <form className="space-y-5" onSubmit={handleSubmit}>
 
                         {/* Email */}
                         <div>
@@ -84,10 +138,8 @@ export default function LoginPage() {
                                     id="email"
                                     name="email"
                                     placeholder="you@example.com"
-                                    value={email}
-                                    onChange={(e) =>
-                                        setEmail(e.target.value)
-                                    }
+                                    value={loginDetails.email}
+                                    onChange={handleChange}
                                     required
                                     className="w-full rounded-xl border border-white/10 bg-slate-900/70 py-3.5 pl-11 pr-4 text-sm text-white outline-none placeholder:text-slate-600 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                                 />
@@ -140,10 +192,8 @@ export default function LoginPage() {
                                     id="password"
                                     name="password"
                                     placeholder="••••••••"
-                                    value={password}
-                                    onChange={(e) =>
-                                        setPassword(e.target.value)
-                                    }
+                                    value={loginDetails.password}
+                                    onChange={handleChange}
                                     required
                                     className="w-full rounded-xl border border-white/10 bg-slate-900/70 py-3.5 pl-11 pr-12 text-sm text-white outline-none placeholder:text-slate-600 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                                 />
