@@ -3,7 +3,7 @@
 import Table, { TableColumn } from "@/component/Table";
 import ActionButtons from "@/component/ActionButtons";
 import { useEffect, useRef, useState } from "react";
-import { Customer, getAllCustomers } from "../../../services/customerService"
+import { Customer, getAllCustomers, updateCustomer } from "../../../services/customerService"
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
@@ -13,17 +13,21 @@ export default function CustomerPage() {
     const [loading, setLoading] = useState(true);
     const hasFetched = useRef(false);
 
-    // const handleDelete = async(id:string) =>{
-    //     try{
-    //         setCustomer((prev)=>{
-    //             ...prev,
-    //             [name]:value
-    //         })
-    //         const response= await updateCustomer(id)
-    //     }catch(err){
-    //         console.log(err);
-    //     }
-    // }
+    const handleDelete = async(id:string) =>{
+        try{
+            const data={isActive: false};
+            const response= await updateCustomer(id, data);
+            if(response?.status){
+                toast.success("Customer deleted successfully");
+                setCustomer((prev)=>
+                    prev.filter((c)=> c._id !== id)
+                )
+            }
+            else toast.error(response?.msg);
+        }catch(err){
+            console.log(err);
+        }
+    }
 
     useEffect(() => {
         if (hasFetched.current) return;
@@ -70,7 +74,7 @@ export default function CustomerPage() {
                     actions={(row) => (
                         <ActionButtons
                             onEdit={() => router.push(`/admin/customer/${row._id}`)}
-                            // onDelete={handleDelete(row._id)}
+                            onDelete={()=> handleDelete(row._id)}
                         />
                     )}
                 />
