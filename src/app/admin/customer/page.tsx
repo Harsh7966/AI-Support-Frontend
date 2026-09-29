@@ -1,22 +1,39 @@
 "use client";
 
 import Table, { TableColumn } from "@/component/Table";
-import { useEffect, useState } from "react";
+import ActionButtons from "@/component/ActionButtons";
+import { useEffect, useRef, useState } from "react";
 import { Customer, getAllCustomers } from "../../../services/customerService"
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
-export default function Customer() {
+export default function CustomerPage() {
+    const router = useRouter();
     const [customer, setCustomer] = useState<Customer[]>([])
     const [loading, setLoading] = useState(true);
+    const hasFetched = useRef(false);
+
+    // const handleDelete = async(id:string) =>{
+    //     try{
+    //         setCustomer((prev)=>{
+    //             ...prev,
+    //             [name]:value
+    //         })
+    //         const response= await updateCustomer(id)
+    //     }catch(err){
+    //         console.log(err);
+    //     }
+    // }
 
     useEffect(() => {
+        if (hasFetched.current) return;
+        hasFetched.current = true;
+
         const fetchCustomers = async () => {
             try {
                 const response = await getAllCustomers();
-                console.log(response, "aedjojef");
                 if (response?.status) {
-                    setCustomer(response?.data);
-                    toast.success(response?.msg);
+                    setCustomer(response?.data ?? []);
                 } else {
                     toast.error(response?.msg);
                 }
@@ -43,15 +60,21 @@ export default function Customer() {
 
     return (
         <>
-            <main className="min-h-screen bg-slate-950 px-6 py-10">
-                <h1 className="mb-6 text-2xl font-bold text-white">Customers</h1>
+            <div className="p-8">
+                <h2 className="mb-6 text-2xl font-bold text-slate-800">Customers</h2>
                 <Table
                     columns={columns}
                     data={customer}
                     keyExtractor={(row) => row._id}
                     loading={loading}
+                    actions={(row) => (
+                        <ActionButtons
+                            onEdit={() => router.push(`/admin/customer/${row._id}`)}
+                            // onDelete={handleDelete(row._id)}
+                        />
+                    )}
                 />
-            </main>
+            </div>
         </>
     )
 }

@@ -1,6 +1,6 @@
 import axiosInstance from "./axios";
 
-interface Customer{
+export interface Customer{
     _id: string;
     firstName?: string;
     lastName?: string;
@@ -33,7 +33,7 @@ export const getCustomerDetails= async(id: string): Promise<customerDetailRespon
     return response.data;
 }
 
-export const updateCustomer= async(id: string ,data: Promise<Customer>): Promise<customerDetailResponse>=>{
-    const response= await axiosInstance.patch(`/admin/update-customer/${id}`);
+export const updateCustomer= async(id: string ,data: Partial<Customer>): Promise<customerDetailResponse>=>{
+    const response= await axiosInstance.patch(`/admin/update-customer/${id}`, data);
     return response.data;
 }

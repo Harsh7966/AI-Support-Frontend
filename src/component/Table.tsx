@@ -14,6 +14,8 @@ interface TableProps<T> {
     keyExtractor: (row: T, index: number) => string | number;
     loading?: boolean;
     emptyMessage?: string;
+    /** Optional: renders an "Actions" column with per-row buttons */
+    actions?: (row: T, index: number) => ReactNode;
 }
 
 export default function Table<T>({
@@ -22,18 +24,36 @@ export default function Table<T>({
     keyExtractor,
     loading = false,
     emptyMessage = "No records found",
+    actions,
 }: TableProps<T>) {
+    const totalColumns = columns.length + (actions ? 1 : 0);
     const getCellValue = (row: T, column: TableColumn<T>): ReactNode => {
-        if (typeof column.accessor === "function") {
-            return column.accessor(row);
+        const value =
+            typeof column.accessor === "function"
+                ? column.accessor(row)
+                : (row[column.accessor] as ReactNode);
+
+        // Show "null" for empty values (null, undefined, empty/blank string)
+        if (
+            value === null ||
+            value === undefined ||
+            (typeof value === "string" && value.trim() === "")
+        ) {
+            return "null";
         }
-        return row[column.accessor] as ReactNode;
+
+        // Booleans render nothing in React, so show them as text
+        if (typeof value === "boolean") {
+            return String(value);
+        }
+
+        return value;
     };
-    console.log(data, "PPPMMMM");
+
     return (
-        <div className="w-full overflow-x-auto rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl">
-            <table className="w-full min-w-[640px] text-left text-sm text-slate-300">
-                <thead className="bg-slate-900/70 text-xs uppercase tracking-wider text-slate-400">
+        <div className="w-full overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+            <table className="w-full min-w-[640px] text-left text-sm text-slate-700">
+                <thead className="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
                     <tr>
                         {columns.map((column, idx) => (
                             <th
@@ -43,14 +63,17 @@ export default function Table<T>({
                                 {column.header}
                             </th>
                         ))}
+                        {actions && (
+                            <th className="px-6 py-4 font-semibold">Actions</th>
+                        )}
                     </tr>
                 </thead>
 
-                <tbody className="divide-y divide-white/10">
+                <tbody className="divide-y divide-slate-100">
                     {loading ? (
                         <tr>
                             <td
-                                colSpan={columns.length}
+                                colSpan={totalColumns}
                                 className="px-6 py-10 text-center text-slate-500"
                             >
                                 Loading...
@@ -59,7 +82,7 @@ export default function Table<T>({
                     ) : data.length === 0 ? (
                         <tr>
                             <td
-                                colSpan={columns.length}
+                                colSpan={totalColumns}
                                 className="px-6 py-10 text-center text-slate-500"
                             >
                                 {emptyMessage}
@@ -69,7 +92,7 @@ export default function Table<T>({
                         data.map((row, index) => (
                             <tr
                                 key={keyExtractor(row, index)}
-                                className="transition hover:bg-white/5"
+                                className="transition hover:bg-slate-50"
                             >
                                 {columns.map((column, idx) => (
                                     <td
@@ -79,6 +102,11 @@ export default function Table<T>({
                                         {getCellValue(row, column)}
                                     </td>
                                 ))}
+                                {actions && (
+                                    <td className="px-6 py-4">
+                                        {actions(row, index)}
+                                    </td>
+                                )}
                             </tr>
                         ))
                     )}
