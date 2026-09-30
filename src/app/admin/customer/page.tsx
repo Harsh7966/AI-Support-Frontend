@@ -15,7 +15,7 @@ export default function CustomerPage() {
 
     const handleDelete = async(id:string) =>{
         try{
-            const data={isActive: false};
+            const data={isDeleted: true ,isActive: false};
             const response= await updateCustomer(id, data);
             if(response?.status){
                 toast.success("Customer deleted successfully");
@@ -36,11 +36,7 @@ export default function CustomerPage() {
         const fetchCustomers = async () => {
             try {
                 const response = await getAllCustomers();
-                if (response?.status) {
-                    setCustomer(response?.data ?? []);
-                } else {
-                    toast.error(response?.msg);
-                }
+                if (response?.status) setCustomer(response?.data ?? []);
             } catch (err) {
                 console.log(err);
             } finally {

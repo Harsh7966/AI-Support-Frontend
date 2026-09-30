@@ -208,7 +208,6 @@ export default function EditCustomerPage() {
                                     <select id="role" name="role" value={details?.role ?? "user"} onChange={handleChange} className={inputClass}>
                                         <option value="user">User</option>
                                         <option value="agent">Agent</option>
-                                        <option value="admin">Admin</option>
                                     </select>
                                 </div>
 
@@ -218,7 +217,7 @@ export default function EditCustomerPage() {
                                             Email Verified
                                         </p>
                                         <p className="text-xs text-slate-500">
-                                            Mark the customer's email as verified
+                                            Mark the customer email as verified
                                         </p>
                                     </div>
 
