@@ -2,7 +2,7 @@
 
 import ActionButtons from "@/component/ActionButtons";
 import Table, { TableColumn } from "@/component/Table";
-import { Agent, getAllAgent, updateAgent } from "@/services/agentService";
+import { Agent, getAllAgent, updateAgent } from "@/services/admin/agentService";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -28,7 +28,7 @@ export default function Agents() {
 
     useEffect(() => {
         if(hasFetched.current) return;
-        hasFetched.current= false;
+        hasFetched.current= true;
         const fetchAgents = async () => {
             try {
                 const response = await getAllAgent();

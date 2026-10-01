@@ -1,6 +1,6 @@
 "use client"
 
-import { Agent, createAgent } from "@/services/agentService";
+import { Agent, createAgent } from "@/services/admin/agentService";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

@@ -1,6 +1,6 @@
 "use client";
 
-import { Customer, getCustomerDetails, updateCustomer } from "@/services/customerService";
+import { Customer, getCustomerDetails, updateCustomer } from "@/services/admin/customerService";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";

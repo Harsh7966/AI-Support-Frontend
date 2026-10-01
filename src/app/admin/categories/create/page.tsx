@@ -1,6 +1,6 @@
 "use client"
 
-import { Category, createCategory } from "@/services/categoryService";
+import { Category, createCategory } from "@/services/admin/categoryService";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

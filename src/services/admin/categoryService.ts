@@ -1,4 +1,4 @@
-import axiosInstance from "./axios";
+import axiosInstance from "../axios";
 
 export interface Category{
     _id: string;
@@ -9,13 +9,13 @@ export interface Category{
 
 interface categoryListingResponse{
     status: Boolean;
-    data?: Agent[];
+    data?: Category[];
     msg: string;
 }
 
 interface categoryDetailResponse{
     status: Boolean;
-    data?: Agent;
+    data?: Category;
     msg: string;
 }
 

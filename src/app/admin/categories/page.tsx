@@ -2,7 +2,7 @@
 
 import ActionButtons from "@/component/ActionButtons";
 import Table, { TableColumn } from "@/component/Table";
-import { Category, getAllCategory, updateCategory } from "@/services/categoryService";
+import { Category, getAllCategory, updateCategory } from "@/services/admin/categoryService";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";

@@ -3,7 +3,7 @@
 import Table, { TableColumn } from "@/component/Table";
 import ActionButtons from "@/component/ActionButtons";
 import { useEffect, useRef, useState } from "react";
-import { Customer, getAllCustomers, updateCustomer } from "../../../services/customerService"
+import { Customer, getAllCustomers, updateCustomer } from "../../../services/admin/customerService"
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
