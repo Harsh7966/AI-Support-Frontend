@@ -10,7 +10,7 @@ const navSections = [
         title: "Main",
         items: [
             { label: "Dashboard", href: "/admin", icon: "📊" },
-            { label: "Tickets", href: "/admin/tickets", icon: "🎫" },
+            { label: "Tickets", href: "/admin/ticket", icon: "🎫" },
             { label: "Assignment", href: "/admin/assignment", icon: "🔄" },
         ],
     },

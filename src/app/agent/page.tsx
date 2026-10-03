@@ -86,7 +86,7 @@ export default function AgentDashboard() {
                     </Link>
 
                     <Link
-                        href="/agent/tickets"
+                        href="/agent/ticket"
                         className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-400 transition hover:bg-white/5 hover:text-white"
                     >
                         <span>▣</span>
