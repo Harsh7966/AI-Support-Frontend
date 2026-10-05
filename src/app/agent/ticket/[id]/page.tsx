@@ -7,6 +7,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getTicketDetails, Ticket, upadteTicketDetails } from "@/services/agent/ticketService";
 import { toast } from "react-toastify";
+import ChatThread from "@/component/ChatThread";
+import { getMessages } from "@/services/agent/messageService";
 
 const fieldClass =
     "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20";
@@ -278,6 +280,11 @@ export default function EditTicketPage() {
                             </div>
                         </div>
                     </form>
+
+                    {/* Live chat (form ke bahar, taaki nested form na bane) */}
+                    <div className="mt-6 xl:max-w-[calc(66.666%-0.5rem)]">
+                        <ChatThread ticketId={id} myId={user?._id ?? ""} fetchMessages={getMessages} />
+                    </div>
                 </div>
             </main>
         </div>

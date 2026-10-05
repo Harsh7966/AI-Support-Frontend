@@ -5,6 +5,7 @@ import ActionButtons from "@/component/ActionButtons";
 import Table, { TableColumn } from "@/component/Table";
 import { myTickets, Ticket } from "@/services/customer/ticketService";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const priorityStyle: Record<Ticket["priority"], string> = {
     High: "bg-red-50 text-red-600",
@@ -61,6 +62,7 @@ const columns: TableColumn<Ticket>[] = [
 ];
 
 export default function MyTicketsPage() {
+    const router = useRouter();
     const [tickets, setTickets] = useState<Ticket[]>([]);
     const hasFetched = useRef(false);
 
@@ -222,7 +224,7 @@ export default function MyTicketsPage() {
                         data={tickets}
                         keyExtractor={(row) => row._id}
                         emptyMessage="You haven't created any tickets yet"
-                        actions={() => <ActionButtons onView={() => { }} />}
+                        actions={(row) => <ActionButtons onView={() => router.push(`/user/tickets/${row._id}`)} />}
                     />
 
                 </div>

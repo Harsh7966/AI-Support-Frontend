@@ -31,3 +31,14 @@ export const myTickets= async(): Promise<TicketsListingResponse>=>{
     const response= await axiosInstance.get("/user/getall-ticket");
     return response.data;
 }
+
+interface TicketDetailResponse {
+    status: boolean;
+    data?: Ticket;
+    msg: string;
+}
+
+export const getTicketDetails= async(id: string): Promise<TicketDetailResponse>=>{
+    const response= await axiosInstance.get(`/user/ticket-detail/${id}`);
+    return response.data;
+}
