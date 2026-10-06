@@ -102,7 +102,7 @@ export default function TicketDetailPage() {
                                 </div>
                             </div>
 
-                            <ChatThread ticketId={id} myId={user?._id ?? ""} fetchMessages={getMessages} />
+                            <ChatThread ticketId={id} fetchMessages={getMessages} />
                         </div>
 
                         {/* Right: status info */}

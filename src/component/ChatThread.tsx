@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { getSocket } from "@/services/socket";
+import { jwtDecode } from "jwt-decode";
 
 export interface ChatMessage {
     _id: string;
@@ -14,8 +15,6 @@ export interface ChatMessage {
 
 interface ChatThreadProps {
     ticketId: string;
-    myId: string; // logged-in user ki id (bubble left/right decide karne ke liye)
-    // History laane wala function: agent page agent wala dega, customer page customer wala
     fetchMessages: (ticketId: string) => Promise<{ status: boolean; data?: ChatMessage[] }>;
 }
 
@@ -27,10 +26,12 @@ interface ChatThreadProps {
   Send dabane par sirf socket.emit("send-message") karna hai.
   Message list server ke "new-message" se hi update hoti hai (khud mat jodna, warna double dikhega).
 */
-export default function ChatThread({ ticketId, myId, fetchMessages }: ChatThreadProps) {
+export default function ChatThread({ ticketId, fetchMessages }: ChatThreadProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [text, setText] = useState("");
     const bottomRef = useRef<HTMLDivElement>(null);
+    const token = localStorage.getItem("token");
+    const myId = token ? jwtDecode<{ userId: string }>(token).userId : "";
 
     useEffect(() => {
         const socket = getSocket();
@@ -90,9 +91,8 @@ export default function ChatThread({ ticketId, myId, fetchMessages }: ChatThread
                     return (
                         <div key={m._id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                             <div
-                                className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${
-                                    mine ? "bg-blue-600 text-white" : "bg-white/10 text-slate-200"
-                                }`}
+                                className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${mine ? "bg-blue-600 text-white" : "bg-white/10 text-slate-200"
+                                    }`}
                             >
                                 <p className="whitespace-pre-wrap break-words">{m.message}</p>
                                 <p className="mt-1 text-[10px] opacity-60">

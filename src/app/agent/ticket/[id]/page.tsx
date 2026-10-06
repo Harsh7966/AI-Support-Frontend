@@ -283,7 +283,7 @@ export default function EditTicketPage() {
 
                     {/* Live chat (form ke bahar, taaki nested form na bane) */}
                     <div className="mt-6 xl:max-w-[calc(66.666%-0.5rem)]">
-                        <ChatThread ticketId={id} myId={user?._id ?? ""} fetchMessages={getMessages} />
+                        <ChatThread ticketId={id} fetchMessages={getMessages} />
                     </div>
                 </div>
             </main>
