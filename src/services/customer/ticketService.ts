@@ -4,8 +4,8 @@ export interface Ticket {
     _id: string;
     title: string;
     description?: string;
-    priority: "High" | "Medium" | "Low";
-    status: "Open" | "In Progress" | "Resolved";
+    priority: string;
+    status: string;
     categoryId?: { _id: string; name: string } | string;
     createdAt: string;
 }

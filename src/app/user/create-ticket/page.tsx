@@ -203,6 +203,7 @@ export default function CreateTicketPage() {
                                         Priority <span className="text-red-400">*</span>
                                     </label>
                                     <select id="priority" value={ticketDetail?.priority ?? "Medium"} className={inputClass} name="priority" onChange={handleChange}>
+                                        <option className="bg-slate-900">Select Priority</option>
                                         <option className="bg-slate-900" value="low">Low</option>
                                         <option className="bg-slate-900" value="medium">Medium</option>
                                         <option className="bg-slate-900" value="high">High</option>

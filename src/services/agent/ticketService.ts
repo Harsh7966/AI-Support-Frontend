@@ -34,7 +34,9 @@ export interface Ticket {
 
     priority: string;
     status: string;
-
+    aiPriority: string;
+    aiSummary: string;
+    aiCategory: string;
     createdAt?: string;
     updatedAt?: string;
 }

@@ -32,9 +32,17 @@ const columns: TableColumn<Ticket>[] = [
         accessor: "priority",
     },
     {
-        header: "Status",
-        accessor: "status",
+        header: "AI Priority",
+        accessor: "aiPriority",
     },
+    {
+        header: "AI Summary",
+        accessor: "aiSummary",
+    },
+    {
+        header: "AI Category",
+        accessor: "aiCategory",
+    }
 ];
 
 export default function AssignedTicketsPage() {

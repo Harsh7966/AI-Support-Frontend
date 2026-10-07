@@ -39,7 +39,7 @@ export default function Table<T>({
             value === undefined ||
             (typeof value === "string" && value.trim() === "")
         ) {
-            return "null";
+            return "-";
         }
 
         // Booleans render nothing in React, so show them as text
