@@ -28,8 +28,8 @@ export default function EditTicketPage() {
     const params = useParams();
     const id = params.id as string;
     const [ticketDetail, setTicketDetail] = useState<Partial<Ticket>>({});
-    const [summaryLoading, setSummaryLoading] = useState(true);
-    const [aiSummary, setAiSummary] = useState<AiSummary>({});
+    const [summaryLoading, setSummaryLoading] = useState(false);
+    const [aiSummary, setAiSummary] = useState<Partial<AiSummary>>({});
     const router = useRouter();
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -59,6 +59,7 @@ export default function EditTicketPage() {
 
     const fetchTicketSummary = async () => {
         try {
+            setSummaryLoading(true);
             const ticketSummaryPayload = {
                 title: ticketDetail?.title,
                 description: ticketDetail?.description,
@@ -326,7 +327,7 @@ export default function EditTicketPage() {
                                         <div className="h-3 w-full rounded bg-white/10" />
                                         <div className="h-3 w-4/5 rounded bg-white/10" />
                                     </div>
-                                ) : aiSummary ? (
+                                ) : Object.keys(aiSummary).length > 0 ? (
                                     <div className="space-y-4">
                                         <div className="flex flex-wrap items-center gap-2">
                                             {
@@ -351,7 +352,9 @@ export default function EditTicketPage() {
                                             <p className="mb-1 text-xs uppercase tracking-wide text-slate-500">
                                                 Summary
                                             </p>
-                                            <p className="leading-relaxed text-slate-200">{aiSummary.summary ?? "The AI couldn't produce a summary, category or priority for this ticket. Please review the ticket details and conversation manually."}</p>
+                                            <p className="leading-relaxed text-slate-200">
+                                                {aiSummary.summary ?? "The AI couldn't produce a summary, category or priority for this ticket. Please review the ticket details and conversation manually."}
+                                            </p>
                                         </div>
                                     </div>
                                 ) : (
