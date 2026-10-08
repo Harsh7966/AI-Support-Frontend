@@ -16,6 +16,7 @@ export interface ChatMessage {
 interface ChatThreadProps {
     ticketId: string;
     fetchMessages: (ticketId: string) => Promise<{ status: boolean; data?: ChatMessage[] }>;
+    showSuggestReply?: boolean; // sirf agent page par true (abhi sirf UI, koi logic nahi)
 }
 
 /*
@@ -26,7 +27,7 @@ interface ChatThreadProps {
   Send dabane par sirf socket.emit("send-message") karna hai.
   Message list server ke "new-message" se hi update hoti hai (khud mat jodna, warna double dikhega).
 */
-export default function ChatThread({ ticketId, fetchMessages }: ChatThreadProps) {
+export default function ChatThread({ ticketId, fetchMessages, showSuggestReply = false }: ChatThreadProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [text, setText] = useState("");
     const bottomRef = useRef<HTMLDivElement>(null);
@@ -118,6 +119,14 @@ export default function ChatThread({ ticketId, fetchMessages }: ChatThreadProps)
                     placeholder="Type a message..."
                     className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                 />
+                {showSuggestReply && (
+                    <button
+                        type="button"
+                        className="rounded-xl border border-purple-500/30 bg-purple-500/10 px-5 py-2.5 text-sm font-medium text-purple-300 transition hover:bg-purple-500/20"
+                    >
+                        ✨ Suggest Reply
+                    </button>
+                )}
                 <button
                     type="button"
                     onClick={handleSend}

@@ -9,18 +9,28 @@ import { getTicketDetails, Ticket, upadteTicketDetails } from "@/services/agent/
 import { toast } from "react-toastify";
 import ChatThread from "@/component/ChatThread";
 import { getMessages } from "@/services/agent/messageService";
+import { AiSummary, getAiTicketSummary } from "@/services/aiService";
 
 const fieldClass =
     "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20";
 
 const labelClass = "mb-2 block text-sm font-medium text-slate-300";
 
+const priorityStyles: Record<string, string> = {
+    low: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    medium: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    high: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+    urgent: "bg-red-500/10 text-red-400 border-red-500/20",
+};
+
 export default function EditTicketPage() {
     const { user } = useSelector((state: RootState) => state.auth);
     const params = useParams();
     const id = params.id as string;
     const [ticketDetail, setTicketDetail] = useState<Partial<Ticket>>({});
-    const router= useRouter();
+    const [summaryLoading, setSummaryLoading] = useState(true);
+    const [aiSummary, setAiSummary] = useState<AiSummary>({});
+    const router = useRouter();
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
         setTicketDetail((prev) => ({
@@ -29,21 +39,39 @@ export default function EditTicketPage() {
         }))
     }
 
-    const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         try {
             e.preventDefault();
-            const finalPayload= {
+            const finalPayload = {
                 status: ticketDetail?.status,
                 priority: ticketDetail?.priority
             }
 
-            const response= await upadteTicketDetails(finalPayload, id);
-            if(response?.status){
+            const response = await upadteTicketDetails(finalPayload, id);
+            if (response?.status) {
                 toast.success(response?.msg);
                 router.push("/agent/ticket");
             }
         } catch (err) {
             console.log(err);
+        }
+    }
+
+    const fetchTicketSummary = async () => {
+        try {
+            const ticketSummaryPayload = {
+                title: ticketDetail?.title,
+                description: ticketDetail?.description,
+            }
+            const response = await getAiTicketSummary(ticketSummaryPayload, id);
+            console.log(response, "AI summary response");
+            if (response) {
+                setAiSummary(response?.data);
+            }
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setSummaryLoading(false);
         }
     }
 
@@ -57,15 +85,7 @@ export default function EditTicketPage() {
             }
         }
         fetchTicketDetails();
-    }, [id])
-
-    useEffect(() => {
-
-    }, [])
-
-    useEffect(() => {
-
-    }, [])
+    }, [id, aiSummary])
 
     return (
         <div className="min-h-screen bg-slate-950 text-white">
@@ -282,8 +302,68 @@ export default function EditTicketPage() {
                     </form>
 
                     {/* Live chat (form ke bahar, taaki nested form na bane) */}
-                    <div className="mt-6 xl:max-w-[calc(66.666%-0.5rem)]">
-                        <ChatThread ticketId={id} fetchMessages={getMessages} />
+                    <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
+                        <div className="xl:col-span-2">
+                            <ChatThread ticketId={id} fetchMessages={getMessages} showSuggestReply />
+                        </div>
+
+                        {/* AI Summary box (abhi sirf UI, API/state baad me) */}
+                        <div className="h-fit rounded-2xl border border-white/10 bg-white/5 p-6">
+                            <div className="mb-4 flex items-center justify-between">
+                                <h3 className="text-base font-semibold">AI Summary</h3>
+                                <button
+                                    type="button"
+                                    className="rounded-xl border border-purple-500/30 bg-purple-500/10 px-4 py-2 text-xs font-medium text-purple-300 transition hover:bg-purple-500/20 cursor-pointer"
+                                    onClick={() => fetchTicketSummary()}
+                                >
+                                    ✨ Generate Summary
+                                </button>
+                            </div>
+                            <div className="min-h-32 rounded-xl border border-white/10 bg-white/5 p-4 text-sm">
+                                {summaryLoading ? (
+                                    <div className="space-y-3 animate-pulse">
+                                        <div className="h-3 w-1/3 rounded bg-white/10" />
+                                        <div className="h-3 w-full rounded bg-white/10" />
+                                        <div className="h-3 w-4/5 rounded bg-white/10" />
+                                    </div>
+                                ) : aiSummary ? (
+                                    <div className="space-y-4">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            {
+                                                aiSummary.category &&
+                                                <span className="rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-xs font-medium text-sky-400">
+                                                    {aiSummary.category}
+                                                </span>
+                                            }
+                                            {
+                                                aiSummary.priority &&
+                                                <span
+                                                    className={`rounded-full border px-3 py-1 text-xs font-medium capitalize ${priorityStyles[aiSummary?.priority?.toLowerCase()] ??
+                                                        "bg-white/10 text-slate-300 border-white/10"
+                                                        }`}
+                                                >
+                                                    {aiSummary.priority} priority
+                                                </span>
+                                            }
+                                        </div>
+
+                                        <div>
+                                            <p className="mb-1 text-xs uppercase tracking-wide text-slate-500">
+                                                Summary
+                                            </p>
+                                            <p className="leading-relaxed text-slate-200">{aiSummary.summary ?? "The AI couldn't produce a summary, category or priority for this ticket. Please review the ticket details and conversation manually."}</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex h-full min-h-24 flex-col items-center justify-center text-center text-slate-400">
+                                        <p>Right now there is not any summary</p>
+                                        <p className="mt-1 text-xs text-slate-500">
+                                            For view AI summary, category aur priority &quot; Press &quot; Generate Summary
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>
