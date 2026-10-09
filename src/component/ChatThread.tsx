@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { getSocket } from "@/services/socket";
 import { jwtDecode } from "jwt-decode";
+import axiosInstance from "@/services/axios";
+import { toast } from "react-toastify";
 
 export interface ChatMessage {
     _id: string;
@@ -19,20 +21,30 @@ interface ChatThreadProps {
     showSuggestReply?: boolean; // sirf agent page par true (abhi sirf UI, koi logic nahi)
 }
 
-/*
-  FLOW (page khulte hi):
-  1) GET API se purane messages -> state me
-  2) socket se ticket room join
-  3) "new-message" sunte raho -> state me jodte jao
-  Send dabane par sirf socket.emit("send-message") karna hai.
-  Message list server ke "new-message" se hi update hoti hai (khud mat jodna, warna double dikhega).
-*/
+
 export default function ChatThread({ ticketId, fetchMessages, showSuggestReply = false }: ChatThreadProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [text, setText] = useState("");
+    const [darftLoading, setDraftLoading]= useState(false);
     const bottomRef = useRef<HTMLDivElement>(null);
     const token = localStorage.getItem("token");
     const myId = token ? jwtDecode<{ userId: string }>(token).userId : "";
+
+    const getAiSuggestedDraft= async() =>{
+        try{
+            setDraftLoading(true);
+            const response= await axiosInstance.get(`/ai/generateDraft/${ticketId}`);
+            if(response?.data?.status){
+                setText(response?.data?.data?.aiDraft);
+            }else{
+                toast.error(response?.data?.msg);
+            }
+        }catch(err){
+            console.log(err);
+        }finally{
+            setDraftLoading(false);
+        }
+    }
 
     useEffect(() => {
         const socket = getSocket();
@@ -69,7 +81,7 @@ export default function ChatThread({ ticketId, fetchMessages, showSuggestReply =
     // Naya message aane par neeche scroll
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
+    }, [messages, text]);
 
     const handleSend = () => {
         if (!text.trim()) return;
@@ -123,8 +135,9 @@ export default function ChatThread({ ticketId, fetchMessages, showSuggestReply =
                     <button
                         type="button"
                         className="rounded-xl border border-purple-500/30 bg-purple-500/10 px-5 py-2.5 text-sm font-medium text-purple-300 transition hover:bg-purple-500/20"
+                        onClick={()=> getAiSuggestedDraft()}
                     >
-                        ✨ Suggest Reply
+                        {darftLoading? "✨ Draft Generating...": "✨ Suggest Reply"}
                     </button>
                 )}
                 <button

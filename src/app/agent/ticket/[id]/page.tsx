@@ -346,6 +346,37 @@ export default function EditTicketPage() {
                                                     {aiSummary.priority} priority
                                                 </span>
                                             }
+                                            {
+                                                Array.isArray(aiSummary.keyPoints) && aiSummary.keyPoints.length > 0 &&
+                                                <div>
+                                                    <p className="mb-2 text-xs uppercase tracking-wide text-slate-500">
+                                                        Key Points
+                                                    </p>
+                                                    <ul className="space-y-2">
+                                                        {aiSummary.keyPoints.map((point: string, index: number) => (
+                                                            <li
+                                                                key={index}
+                                                                className="flex items-start gap-2 text-sm leading-relaxed text-slate-200"
+                                                            >
+                                                                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-sky-400" />
+                                                                <span>{point}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            }
+
+                                            {
+                                                aiSummary.suggestedNextStep &&
+                                                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3">
+                                                    <p className="mb-1 text-xs uppercase tracking-wide text-emerald-400">
+                                                        Suggested Next Step
+                                                    </p>
+                                                    <p className="text-sm leading-relaxed text-slate-200">
+                                                        {aiSummary.suggestedNextStep}
+                                                    </p>
+                                                </div>
+                                            }
                                         </div>
 
                                         <div>

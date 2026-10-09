@@ -4,6 +4,8 @@ export interface AiSummary{
     category?: string;
     priority: string;
     summary?: string;
+    keyPoints: string[];
+    suggestedNextStep?: string
 }
 interface ticketInterface {
     title?: string;
