@@ -10,6 +10,8 @@ import { toast } from "react-toastify";
 import ChatThread from "@/component/ChatThread";
 import { getMessages } from "@/services/agent/messageService";
 import { AiSummary, getAiTicketSummary } from "@/services/aiService";
+import AskAssistant from "@/component/AskAssistant";
+import SimilarTickets from "@/component/SimilarTickets";
 
 const fieldClass =
     "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20";
@@ -308,7 +310,8 @@ export default function EditTicketPage() {
                             <ChatThread ticketId={id} fetchMessages={getMessages} showSuggestReply />
                         </div>
 
-                        {/* AI Summary box (abhi sirf UI, API/state baad me) */}
+                        {/* Right column: AI Summary + Similar Tickets */}
+                        <div className="space-y-6">
                         <div className="h-fit rounded-2xl border border-white/10 bg-white/5 p-6">
                             <div className="mb-4 flex items-center justify-between">
                                 <h3 className="text-base font-semibold">AI Summary</h3>
@@ -398,6 +401,13 @@ export default function EditTicketPage() {
                                 )}
                             </div>
                         </div>
+                        <SimilarTickets title={ticketDetail?.title} description={ticketDetail?.description} />
+                        </div>
+                    </div>
+
+                    {/* RAG assistant */}
+                    <div className="mt-6">
+                        <AskAssistant />
                     </div>
                 </div>
             </main>

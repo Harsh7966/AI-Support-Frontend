@@ -3,52 +3,36 @@
 import Link from "next/link";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { useEffect, useState } from "react";
+import { agentDashboardData, AssignTicket } from "@/services/agent/ticketService";
 
 export default function AgentDashboard() {
     const { user } = useSelector((state: RootState) => state.auth);
+    const [tickets, setTickets] = useState<AssignTicket[]>([])
+    const [open, setOpen] = useState<number>();
+    const [pending, setPending] = useState<number>();
+    const [resolved, setResolved] = useState<number>();
+    const [total, setTotal] = useState<number>();
+    useEffect(() => {
+        const fetchAgentDashboardRecord = async () => {
+            try {
+                const response = await agentDashboardData();
+                console.log(response, "API response");
+                if (response?.status) {
+                    setTickets(response?.tickets);
+                    setOpen(response?.open);
+                    setPending(response?.pending);
+                    setResolved(response?.resolved);
+                    setTotal(response?.total);
+                }
+            } catch (err) {
+                console.log(err);
+            }
+        }
+        fetchAgentDashboardRecord();
+    }, [])
 
-    const tickets = [
-        {
-            id: "#TKT-1042",
-            title: "Unable to login to my account",
-            customer: "Rahul Sharma",
-            status: "Open",
-            priority: "High",
-            time: "10 min ago",
-        },
-        {
-            id: "#TKT-1039",
-            title: "Payment deducted but order failed",
-            customer: "Priya Singh",
-            status: "Pending",
-            priority: "High",
-            time: "35 min ago",
-        },
-        {
-            id: "#TKT-1035",
-            title: "Unable to update profile information",
-            customer: "Amit Verma",
-            status: "Open",
-            priority: "Medium",
-            time: "1 hour ago",
-        },
-        {
-            id: "#TKT-1028",
-            title: "Account verification problem",
-            customer: "Neha Gupta",
-            status: "Resolved",
-            priority: "Low",
-            time: "3 hours ago",
-        },
-        {
-            id: "#TKT-1024",
-            title: "Password reset request",
-            customer: "Rohit Kumar",
-            status: "Resolved",
-            priority: "Medium",
-            time: "Yesterday",
-        },
-    ];
+    console.log(tickets, "UUUUUUUUUU");
 
     return (
         <div className="min-h-screen bg-slate-950 text-white">
@@ -214,7 +198,7 @@ export default function AgentDashboard() {
                             </div>
 
                             <p className="text-3xl font-bold">
-                                18
+                                {total }
                             </p>
 
                             <p className="mt-1 text-sm text-slate-400">
@@ -239,7 +223,7 @@ export default function AgentDashboard() {
                             </div>
 
                             <p className="text-3xl font-bold">
-                                6
+                                {open}
                             </p>
 
                             <p className="mt-1 text-sm text-slate-400">
@@ -264,7 +248,7 @@ export default function AgentDashboard() {
                             </div>
 
                             <p className="text-3xl font-bold">
-                                4
+                                {pending}
                             </p>
 
                             <p className="mt-1 text-sm text-slate-400">
@@ -289,7 +273,7 @@ export default function AgentDashboard() {
                             </div>
 
                             <p className="text-3xl font-bold">
-                                8
+                                {resolved}
                             </p>
 
                             <p className="mt-1 text-sm text-slate-400">
@@ -302,7 +286,7 @@ export default function AgentDashboard() {
 
                     {/* ================= CONTENT ================= */}
 
-                    <div className="mt-6 grid gap-6 xl:grid-cols-3">
+                    <div className="mt-6 w-full">
 
                         {/* Assigned Tickets */}
 
@@ -323,7 +307,7 @@ export default function AgentDashboard() {
                                 </div>
 
                                 <Link
-                                    href="/agent/tickets"
+                                    href="/agent/ticket"
                                     className="text-sm font-medium text-blue-400 hover:text-blue-300"
                                 >
                                     View all
@@ -333,11 +317,11 @@ export default function AgentDashboard() {
 
                             <div className="divide-y divide-white/5">
 
-                                {tickets.map((ticket) => (
+                                {tickets.map((t: any) => (
 
                                     <Link
-                                        key={ticket.id}
-                                        href={`/agent/tickets/${ticket.id.replace("#TKT-", "")}`}
+                                        key={t._id}
+                                        href={`/agent/tickets/${t._id}`}
                                         className="block px-5 py-4 transition hover:bg-white/[0.03]"
                                     >
 
@@ -349,26 +333,25 @@ export default function AgentDashboard() {
                                                 <div className="flex flex-wrap items-center gap-2">
 
                                                     <span className="text-xs font-medium text-blue-400">
-                                                        {ticket.id}
+                                                        {t._id}
                                                     </span>
 
                                                     <span
-                                                        className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                                                            ticket.status === "Open"
+                                                        className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${t.status === "open"
                                                                 ? "bg-yellow-500/10 text-yellow-400"
-                                                                : ticket.status === "Pending"
-                                                                ? "bg-orange-500/10 text-orange-400"
-                                                                : "bg-green-500/10 text-green-400"
-                                                        }`}
+                                                                : t.status === "pending"
+                                                                    ? "bg-orange-500/10 text-orange-400"
+                                                                    : "bg-green-500/10 text-green-400"
+                                                            }`}
                                                     >
-                                                        {ticket.status}
+                                                        {t.status}
                                                     </span>
 
                                                 </div>
 
                                                 {/* Title */}
                                                 <h4 className="mt-1 truncate text-sm font-medium text-white">
-                                                    {ticket.title}
+                                                    {t.title}
                                                 </h4>
 
                                                 {/* Customer */}
@@ -379,28 +362,27 @@ export default function AgentDashboard() {
                                                     </span>
 
                                                     <span className="text-xs text-slate-300">
-                                                        {ticket.customer}
+                                                        {`${t.customerId.firstName} ${t.customerId.lastName}`}
                                                     </span>
 
                                                 </div>
 
                                                 <p className="mt-1 text-xs text-slate-600">
-                                                    {ticket.time}
+                                                    {new Date(t.createdAt).toLocaleDateString("en-GB")}
                                                 </p>
 
                                             </div>
 
                                             {/* Priority */}
                                             <span
-                                                className={`shrink-0 rounded-lg px-2 py-1 text-[10px] font-medium ${
-                                                    ticket.priority === "High"
+                                                className={`shrink-0 rounded-lg px-2 py-1 text-[10px] font-medium ${t.priority === "high"
                                                         ? "bg-red-500/10 text-red-400"
-                                                        : ticket.priority === "Medium"
-                                                        ? "bg-orange-500/10 text-orange-400"
-                                                        : "bg-slate-500/10 text-slate-400"
-                                                }`}
+                                                        : t.priority === "medium"
+                                                            ? "bg-orange-500/10 text-orange-400"
+                                                            : "bg-slate-500/10 text-slate-400"
+                                                    }`}
                                             >
-                                                {ticket.priority}
+                                                {t.priority}
                                             </span>
 
                                         </div>
@@ -410,195 +392,6 @@ export default function AgentDashboard() {
                                 ))}
 
                             </div>
-
-                        </div>
-
-                        {/* ================= AI PANEL ================= */}
-
-                        <div className="space-y-6">
-
-                            {/* AI Summary */}
-                            <div className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-500/10 via-blue-500/5 to-transparent p-6">
-
-                                <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-purple-500/10 blur-3xl" />
-
-                                <div className="relative">
-
-                                    <div className="mb-4 flex items-center justify-between">
-
-                                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 text-xl">
-                                            ✦
-                                        </div>
-
-                                        <span className="rounded-full bg-purple-500/10 px-2 py-1 text-[10px] font-medium text-purple-400">
-                                            AI
-                                        </span>
-
-                                    </div>
-
-                                    <h3 className="font-semibold">
-                                        AI Ticket Summary
-                                    </h3>
-
-                                    <p className="mt-2 text-sm leading-6 text-slate-400">
-                                        AI can summarize long customer conversations
-                                        so you can understand the issue quickly.
-                                    </p>
-
-                                    <Link
-                                        href="/agent/tickets/1042"
-                                        className="mt-4 block rounded-xl bg-white/10 px-4 py-3 text-center text-sm font-medium transition hover:bg-white/15"
-                                    >
-                                        View AI Summary →
-                                    </Link>
-
-                                </div>
-
-                            </div>
-
-                            {/* AI Suggested Reply */}
-                            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-
-                                <div className="mb-4 flex items-center gap-3">
-
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10">
-                                        💡
-                                    </div>
-
-                                    <div>
-
-                                        <h3 className="font-semibold">
-                                            AI Suggested Reply
-                                        </h3>
-
-                                        <p className="text-xs text-slate-500">
-                                            For #TKT-1042
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-                                <div className="rounded-xl border border-white/10 bg-slate-950/60 p-4">
-
-                                    <p className="text-sm leading-6 text-slate-400">
-                                        "We're sorry you're experiencing login
-                                        issues. Please try resetting your password
-                                        using the forgot password option. If the
-                                        issue continues, we'll be happy to assist."
-                                    </p>
-
-                                </div>
-
-                                <div className="mt-4 flex gap-2">
-
-                                    <button
-                                        type="button"
-                                        className="flex-1 rounded-xl bg-blue-600 px-3 py-2.5 text-xs font-semibold transition hover:bg-blue-500"
-                                    >
-                                        Use Reply
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-xs text-slate-400 transition hover:text-white"
-                                    >
-                                        Regenerate
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    {/* ================= QUICK ACTIONS ================= */}
-
-                    <div className="mt-6">
-
-                        <h3 className="mb-4 text-sm font-semibold">
-                            Quick Actions
-                        </h3>
-
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-
-                            <Link
-                                href="/agent/tickets"
-                                className="rounded-2xl border border-white/10 bg-white/5 p-5 transition hover:-translate-y-0.5 hover:bg-white/[0.08]"
-                            >
-
-                                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10">
-                                    🎫
-                                </div>
-
-                                <h4 className="text-sm font-semibold">
-                                    View Tickets
-                                </h4>
-
-                                <p className="mt-1 text-xs text-slate-500">
-                                    Manage assigned tickets
-                                </p>
-
-                            </Link>
-
-                            <Link
-                                href="/agent/tickets/1042"
-                                className="rounded-2xl border border-white/10 bg-white/5 p-5 transition hover:-translate-y-0.5 hover:bg-white/[0.08]"
-                            >
-
-                                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/10">
-                                    💬
-                                </div>
-
-                                <h4 className="text-sm font-semibold">
-                                    Continue Conversation
-                                </h4>
-
-                                <p className="mt-1 text-xs text-slate-500">
-                                    Reply to customers
-                                </p>
-
-                            </Link>
-
-                            <Link
-                                href="/agent/tickets/1042"
-                                className="rounded-2xl border border-white/10 bg-white/5 p-5 transition hover:-translate-y-0.5 hover:bg-white/[0.08]"
-                            >
-
-                                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10">
-                                    ✦
-                                </div>
-
-                                <h4 className="text-sm font-semibold">
-                                    AI Assistance
-                                </h4>
-
-                                <p className="mt-1 text-xs text-slate-500">
-                                    Summary & suggested replies
-                                </p>
-
-                            </Link>
-
-                            <Link
-                                href="/agent/profile"
-                                className="rounded-2xl border border-white/10 bg-white/5 p-5 transition hover:-translate-y-0.5 hover:bg-white/[0.08]"
-                            >
-
-                                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/10">
-                                    ⚙
-                                </div>
-
-                                <h4 className="text-sm font-semibold">
-                                    Profile
-                                </h4>
-
-                                <p className="mt-1 text-xs text-slate-500">
-                                    Manage your account
-                                </p>
-
-                            </Link>
 
                         </div>
 

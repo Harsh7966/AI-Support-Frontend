@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { getSocket } from "@/services/socket";
 import { jwtDecode } from "jwt-decode";
-import axiosInstance from "@/services/axios";
+import { getAiDraft, getApiErrorMsg } from "@/services/aiService";
 import { toast } from "react-toastify";
 
 export interface ChatMessage {
@@ -33,14 +33,14 @@ export default function ChatThread({ ticketId, fetchMessages, showSuggestReply =
     const getAiSuggestedDraft= async() =>{
         try{
             setDraftLoading(true);
-            const response= await axiosInstance.get(`/ai/generateDraft/${ticketId}`);
-            if(response?.data?.status){
-                setText(response?.data?.data?.aiDraft);
+            const response= await getAiDraft(ticketId);
+            if(response?.status){
+                setText(response?.data?.aiDraft ?? "");
             }else{
-                toast.error(response?.data?.msg);
+                toast.error(response?.msg || "Could not generate draft");
             }
         }catch(err){
-            console.log(err);
+            toast.error(getApiErrorMsg(err, "AI service error"));
         }finally{
             setDraftLoading(false);
         }
