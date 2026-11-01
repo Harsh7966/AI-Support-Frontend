@@ -85,3 +85,26 @@ export const getApiErrorMsg = (err: unknown, fallback = "Something went wrong"):
     const e = err as { response?: { data?: { msg?: string } } };
     return e?.response?.data?.msg || fallback;
 };
+
+// ---------- Customer AI assistant (RAG + tools) ----------
+export interface KbSource {
+    docId: string;
+    title: string;
+    category: string;
+    score: number;
+}
+
+export interface CustomerAssistantResponse {
+    status: boolean;
+    found?: boolean;
+    answer?: string;
+    sources?: KbSource[];
+    toolsUsed?: string[];
+    msg?: string;
+}
+
+// Customer sawaal poochta hai -> POST /ai/assistant  (jawab: knowledge base + customer ke apne tickets se)
+export const askCustomerAssistant = async (question: string): Promise<CustomerAssistantResponse> => {
+    const response = await axiosInstance.post("/ai/assistant", { question });
+    return response.data;
+};

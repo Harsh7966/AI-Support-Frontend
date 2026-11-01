@@ -186,7 +186,7 @@ export default function CreateTicketPage() {
                                     <label htmlFor="category" className="mb-2 block text-sm font-medium text-slate-300">
                                         Category <span className="text-red-400">*</span>
                                     </label>
-                                    <select id="category" value={ticketDetail?.categoryId ?? ""} className={inputClass} name="categoryId" onChange={handleChange}>
+                                    <select id="category" value={typeof ticketDetail?.categoryId === "object" ? ticketDetail.categoryId._id : ticketDetail?.categoryId ?? ""} className={inputClass} name="categoryId" onChange={handleChange}>
                                         <option value="" disabled className="bg-slate-900">Select a category</option>
                                         {
                                             category.length > 0 && category.map((c, i) => {
