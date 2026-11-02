@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Support Desk — Frontend
+
+Web app for an AI-powered customer support platform, with separate portals for **customers**, **agents** and **admins**. Built with Next.js and connected to the AI Support Backend API.
+
+## Tech Stack
+
+- **Framework:** Next.js 16 (App Router), React 19, TypeScript
+- **Styling:** Tailwind CSS 4
+- **State:** Redux Toolkit (auth)
+- **HTTP:** Axios (with automatic bearer-token interceptor)
+- **Real-time:** Socket.IO client
+- **UI feedback:** react-toastify
+
+## Portals and Features
+
+**Customer** (`/user`)
+- Dashboard with live ticket stats and recent tickets
+- Create and track tickets, view ticket details and chat with the assigned agent
+- AI Assistant that answers from the knowledge base before you open a ticket
+- Profile
+
+**Agent** (`/agent`)
+- Dashboard with assigned-ticket stats
+- Assigned tickets list and detail view (status/priority updates, real-time chat)
+- AI tools: ticket summary, suggested reply, similar tickets, ask-assistant
+- Profile
+
+**Admin** (`/admin`)
+- Overview dashboard
+- Manage tickets, customers, agents and categories
+- Knowledge base management
+- AI Monitoring (usage, cost) and AI Settings
+- Profile
+
+All portals include role-based login and a Logout button.
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── admin/        Admin pages and layout
+│   ├── agent/        Agent pages
+│   ├── user/         Customer pages
+│   ├── login/        Login
+│   └── signup/       Customer signup
+├── component/        Shared UI (PortalShell, ChatThread, LogoutButton, Table, Toasts...)
+├── services/         API clients (axios, auth, admin, agent, customer, AI, socket)
+└── store/            Redux store and auth slice
+```
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20.9 or newer (required by Next.js; set in `engines`)
+- The backend running (see the backend README)
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment Variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Variable | Description |
+| --- | --- |
+| `NEXT_PUBLIC_API_URL` | Backend API base URL, e.g. `http://localhost:5050/api/v1` |
+| `NEXT_PUBLIC_SOCKET_URL` | Backend socket URL, e.g. `http://localhost:5050` |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Run
 
-## Learn More
+```bash
+npm run dev      # development at http://localhost:3000
+npm run build    # production build
+npm start        # serve the production build
+npm run lint     # lint
+```
 
-To learn more about Next.js, take a look at the following resources:
+## How Auth Works
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Login returns a JWT that is saved in `localStorage` and attached to every API request by the Axios interceptor. The user's role (`user`, `agent`, `admin`) decides which portal they are redirected to. Logout removes the token, disconnects the socket and returns to `/login`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Notes
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Start the backend first and make sure `FRONTEND_URL` in the backend `.env` matches this app's origin, otherwise requests are blocked by CORS.
+- This project uses a recent Next.js version with breaking changes from older releases; check `node_modules/next/dist/docs/` before changing framework-level code.
