@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import LogoutButton from "@/component/LogoutButton";
 
 export default function CreateTicketPage() {
     const [ticketDetail, setTicketDetail] = useState<Partial<Ticket>>({});
@@ -123,6 +124,7 @@ export default function CreateTicketPage() {
                             <p className="text-xs text-slate-500">Customer</p>
                         </div>
                     </div>
+                <LogoutButton />
                 </div>
 
             </aside>

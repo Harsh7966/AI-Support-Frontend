@@ -42,3 +42,27 @@ export const getTicketDetails= async(id: string): Promise<TicketDetailResponse>=
     const response= await axiosInstance.get(`/user/ticket-detail/${id}`);
     return response.data;
 }
+
+
+export interface UserDashboardTicket {
+    _id: string;
+    title: string;
+    priority: string;
+    status: string;
+    categoryId?: { _id: string; name: string } | null;
+    createdAt: string;
+}
+
+export interface UserDashboardResponse {
+    status: boolean;
+    tickets: UserDashboardTicket[];
+    total: number;
+    open: number;
+    resolved: number;
+    aiConversations: number;
+}
+
+export const userDashboardData = async (): Promise<UserDashboardResponse> => {
+    const response = await axiosInstance.get("/user/user-dashboard");
+    return response.data;
+}

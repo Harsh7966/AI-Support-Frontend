@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { useEffect, useState } from "react";
 import { agentDashboardData, AssignTicket } from "@/services/agent/ticketService";
+import LogoutButton from "@/component/LogoutButton";
 
 export default function AgentDashboard() {
     const { user } = useSelector((state: RootState) => state.auth);
@@ -110,6 +111,7 @@ export default function AgentDashboard() {
 
                     </div>
 
+                <LogoutButton />
                 </div>
 
             </aside>

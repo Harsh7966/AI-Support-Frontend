@@ -12,6 +12,7 @@ import { getMessages } from "@/services/agent/messageService";
 import { AiSummary, getAiTicketSummary } from "@/services/aiService";
 import AskAssistant from "@/component/AskAssistant";
 import SimilarTickets from "@/component/SimilarTickets";
+import LogoutButton from "@/component/LogoutButton";
 
 const fieldClass =
     "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20";
@@ -142,6 +143,7 @@ export default function EditTicketPage() {
                             <p className="text-xs text-blue-400">Support Agent</p>
                         </div>
                     </div>
+                <LogoutButton />
                 </div>
             </aside>
 

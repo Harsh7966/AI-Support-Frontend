@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import LogoutButton from "@/component/LogoutButton";
 
 type PortalRole = "agent" | "customer";
 
@@ -94,6 +95,7 @@ export default function PortalShell({
                             <p className="text-xs text-blue-400">{portal.label}</p>
                         </div>
                     </div>
+                <LogoutButton />
                 </div>
             </aside>
 

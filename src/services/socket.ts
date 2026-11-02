@@ -23,3 +23,12 @@ export const getSocket = (): Socket => {
     }
     return socket;
 };
+
+
+// Logout par socket band karne ke liye (agla login naya connection banayega)
+export const disconnectSocket = () => {
+    if (socket) {
+        socket.disconnect();
+        socket = null;
+    }
+};

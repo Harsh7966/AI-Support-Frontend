@@ -8,6 +8,7 @@ import { RootState } from "@/store/store";
 import ChatThread from "@/component/ChatThread";
 import { getMessages } from "@/services/customer/messageService";
 import { getTicketDetails } from "@/services/customer/ticketService";
+import LogoutButton from "@/component/LogoutButton";
 
 interface TicketDetail {
     title?: string;
@@ -64,6 +65,10 @@ export default function TicketDetailPage() {
                         <span>＋</span> Create Ticket
                     </Link>
                 </nav>
+
+                <div className="absolute bottom-0 w-full border-t border-white/10 p-4">
+                    <LogoutButton />
+                </div>
             </aside>
 
             {/* Main */}

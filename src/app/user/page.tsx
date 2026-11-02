@@ -3,40 +3,39 @@
 import Link from "next/link";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { useEffect, useState } from "react";
+import { userDashboardData, UserDashboardTicket } from "@/services/customer/ticketService";
+import LogoutButton from "@/component/LogoutButton";
 
 export default function UserDashboard() {
     const { user } = useSelector((state: RootState) => state.auth);
 
-    const tickets = [
-        {
-            id: "#TKT-1024",
-            title: "Unable to login to my account",
-            status: "Open",
-            priority: "High",
-            date: "Today",
-        },
-        {
-            id: "#TKT-1021",
-            title: "Payment was deducted but order failed",
-            status: "Resolved",
-            priority: "Medium",
-            date: "Sep 18",
-        },
-        {
-            id: "#TKT-1018",
-            title: "How can I update my profile?",
-            status: "Open",
-            priority: "Low",
-            date: "Sep 16",
-        },
-        {
-            id: "#TKT-1012",
-            title: "Account verification issue",
-            status: "Resolved",
-            priority: "High",
-            date: "Sep 12",
-        },
-    ];
+    const [tickets, setTickets] = useState<UserDashboardTicket[]>([]);
+    const [total, setTotal] = useState<number>(0);
+    const [open, setOpen] = useState<number>(0);
+    const [resolved, setResolved] = useState<number>(0);
+    const [aiConversations, setAiConversations] = useState<number>(0);
+    const [loading, setLoading] = useState<boolean>(true);
+
+    useEffect(() => {
+        const fetchUserDashboard = async () => {
+            try {
+                const response = await userDashboardData();
+                if (response?.status) {
+                    setTickets(response.tickets || []);
+                    setTotal(response.total ?? 0);
+                    setOpen(response.open ?? 0);
+                    setResolved(response.resolved ?? 0);
+                    setAiConversations(response.aiConversations ?? 0);
+                }
+            } catch (err) {
+                console.log(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchUserDashboard();
+    }, []);
 
     return (
         <div className="min-h-screen bg-slate-950 text-white">
@@ -120,6 +119,7 @@ export default function UserDashboard() {
 
                     </div>
 
+                <LogoutButton />
                 </div>
 
             </aside>
@@ -198,7 +198,7 @@ export default function UserDashboard() {
                                 </span>
                             </div>
 
-                            <p className="text-3xl font-bold">24</p>
+                            <p className="text-3xl font-bold">{total}</p>
                             <p className="mt-1 text-sm text-slate-400">
                                 My Tickets
                             </p>
@@ -215,7 +215,7 @@ export default function UserDashboard() {
                                 </span>
                             </div>
 
-                            <p className="text-3xl font-bold">7</p>
+                            <p className="text-3xl font-bold">{open}</p>
                             <p className="mt-1 text-sm text-slate-400">
                                 Open Tickets
                             </p>
@@ -232,7 +232,7 @@ export default function UserDashboard() {
                                 </span>
                             </div>
 
-                            <p className="text-3xl font-bold">17</p>
+                            <p className="text-3xl font-bold">{resolved}</p>
                             <p className="mt-1 text-sm text-slate-400">
                                 Resolved Tickets
                             </p>
@@ -249,7 +249,7 @@ export default function UserDashboard() {
                                 </span>
                             </div>
 
-                            <p className="text-3xl font-bold">12</p>
+                            <p className="text-3xl font-bold">{aiConversations}</p>
                             <p className="mt-1 text-sm text-slate-400">
                                 AI Conversations
                             </p>
@@ -286,10 +286,20 @@ export default function UserDashboard() {
 
                             <div className="divide-y divide-white/5">
 
+                                {loading && (
+                                    <p className="px-5 py-6 text-sm text-slate-500">Loading...</p>
+                                )}
+
+                                {!loading && tickets.length === 0 && (
+                                    <p className="px-5 py-6 text-sm text-slate-500">
+                                        No tickets yet. Create your first ticket to get started.
+                                    </p>
+                                )}
+
                                 {tickets.map((ticket) => (
                                     <Link
-                                        href={`/user/tickets/${ticket.id.replace("#TKT-", "")}`}
-                                        key={ticket.id}
+                                        href={`/user/tickets/${ticket._id}`}
+                                        key={ticket._id}
                                         className="block px-5 py-4 transition hover:bg-white/[0.03]"
                                     >
 
@@ -299,14 +309,16 @@ export default function UserDashboard() {
 
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-xs font-medium text-blue-400">
-                                                        {ticket.id}
+                                                        #{ticket._id.slice(-6).toUpperCase()}
                                                     </span>
 
                                                     <span
-                                                        className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                                                            ticket.status === "Open"
-                                                                ? "bg-yellow-500/10 text-yellow-400"
-                                                                : "bg-green-500/10 text-green-400"
+                                                        className={`rounded-full px-2 py-0.5 text-[10px] font-medium capitalize ${
+                                                            ticket.status === "resolved" || ticket.status === "closed"
+                                                                ? "bg-green-500/10 text-green-400"
+                                                                : ticket.status === "pending" || ticket.status === "in-progress"
+                                                                ? "bg-orange-500/10 text-orange-400"
+                                                                : "bg-yellow-500/10 text-yellow-400"
                                                         }`}
                                                     >
                                                         {ticket.status}
@@ -318,16 +330,16 @@ export default function UserDashboard() {
                                                 </h4>
 
                                                 <p className="mt-1 text-xs text-slate-500">
-                                                    {ticket.date}
+                                                    {new Date(ticket.createdAt).toLocaleDateString("en-GB")}
                                                 </p>
 
                                             </div>
 
                                             <span
-                                                className={`shrink-0 rounded-lg px-2 py-1 text-[10px] font-medium ${
-                                                    ticket.priority === "High"
+                                                className={`shrink-0 rounded-lg px-2 py-1 text-[10px] font-medium capitalize ${
+                                                    ticket.priority === "high" || ticket.priority === "urgent"
                                                         ? "bg-red-500/10 text-red-400"
-                                                        : ticket.priority === "Medium"
+                                                        : ticket.priority === "medium"
                                                         ? "bg-orange-500/10 text-orange-400"
                                                         : "bg-slate-500/10 text-slate-400"
                                                 }`}

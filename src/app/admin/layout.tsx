@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import LogoutButton from "@/component/LogoutButton";
 
 const navSections = [
     {
@@ -11,7 +12,6 @@ const navSections = [
         items: [
             { label: "Dashboard", href: "/admin", icon: "📊" },
             { label: "Tickets", href: "/admin/ticket", icon: "🎫" },
-            { label: "Assignment", href: "/admin/assignment", icon: "🔄" },
         ],
     },
     {
@@ -140,6 +140,8 @@ export default function AdminLayout({
                                 </p>
                             </div>
                         </div>
+
+                        <LogoutButton variant="light" />
                     </div>
                 </header>
 

@@ -6,6 +6,7 @@ import Table, { TableColumn } from "@/component/Table";
 import { myTickets, Ticket } from "@/services/customer/ticketService";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import LogoutButton from "@/component/LogoutButton";
 
 const priorityStyle: Record<Ticket["priority"], string> = {
     High: "bg-red-50 text-red-600",
@@ -143,6 +144,7 @@ export default function MyTicketsPage() {
                             <p className="text-xs text-slate-500">Customer</p>
                         </div>
                     </div>
+                <LogoutButton />
                 </div>
 
             </aside>

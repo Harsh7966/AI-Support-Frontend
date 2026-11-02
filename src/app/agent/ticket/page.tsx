@@ -8,6 +8,7 @@ import Table, { TableColumn } from "@/component/Table";
 import ActionButtons from "@/component/ActionButtons";
 import { getAllTickets, Ticket } from "@/services/agent/ticketService";
 import { useEffect, useState } from "react";
+import LogoutButton from "@/component/LogoutButton";
 
 const columns: TableColumn<Ticket>[] = [
     {
@@ -115,6 +116,7 @@ export default function AssignedTicketsPage() {
                             <p className="text-xs text-blue-400">Support Agent</p>
                         </div>
                     </div>
+                <LogoutButton />
                 </div>
 
             </aside>
