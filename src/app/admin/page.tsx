@@ -1,278 +1,140 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { getAllTickets, Ticket } from "@/services/admin/ticketsService";
+import { getAllCustomers } from "@/services/admin/customerService";
+import { getAllAgent } from "@/services/admin/agentService";
 
-const tickets = [
-    {
-        id: "#TKT-1042",
-        title: "Unable to login to my account",
-        customer: "Rahul Sharma",
-        agent: "Amit Verma",
-        status: "Open",
-        priority: "High",
-        time: "10 min ago",
-    },
-    {
-        id: "#TKT-1039",
-        title: "Payment deducted but order failed",
-        customer: "Priya Singh",
-        agent: "Neha Gupta",
-        status: "Pending",
-        priority: "High",
-        time: "35 min ago",
-    },
-    {
-        id: "#TKT-1035",
-        title: "Unable to update profile information",
-        customer: "Amit Kumar",
-        agent: "Rahul Mehta",
-        status: "Open",
-        priority: "Medium",
-        time: "1 hour ago",
-    },
-    {
-        id: "#TKT-1028",
-        title: "Account verification problem",
-        customer: "Neha Gupta",
-        agent: "Amit Verma",
-        status: "Resolved",
-        priority: "Low",
-        time: "3 hours ago",
-    },
-];
+const statusStyle: Record<string, string> = {
+    open: "bg-blue-100 text-blue-700",
+    pending: "bg-yellow-100 text-yellow-700",
+    "in-progress": "bg-purple-100 text-purple-700",
+    resolved: "bg-green-100 text-green-700",
+    closed: "bg-slate-100 text-slate-600",
+};
 
-const agents = [
-    {
-        name: "Amit Verma",
-        email: "amit@example.com",
-        assigned: 18,
-        resolved: 14,
-        status: "Online",
-    },
-    {
-        name: "Neha Gupta",
-        email: "neha@example.com",
-        assigned: 15,
-        resolved: 11,
-        status: "Online",
-    },
-    {
-        name: "Rahul Mehta",
-        email: "rahul@example.com",
-        assigned: 12,
-        resolved: 9,
-        status: "Offline",
-    },
-];
+const priorityStyle: Record<string, string> = {
+    urgent: "bg-red-200 text-red-800",
+    high: "bg-red-100 text-red-700",
+    medium: "bg-orange-100 text-orange-700",
+    low: "bg-slate-100 text-slate-600",
+};
+
+const fullName = (u?: { firstName?: string; lastName?: string; email?: string } | null) =>
+    u ? [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email || "-" : "Unassigned";
+
+const timeAgo = (date?: string) => {
+    if (!date) return "";
+    const mins = Math.floor((Date.now() - new Date(date).getTime()) / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins} min ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs} hour${hrs > 1 ? "s" : ""} ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days} day${days > 1 ? "s" : ""} ago`;
+};
 
 export default function AdminHomePage() {
+    const [tickets, setTickets] = useState<Ticket[]>([]);
+    const [customerCount, setCustomerCount] = useState(0);
+    const [agentCount, setAgentCount] = useState(0);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const [t, c, a] = await Promise.all([
+                    getAllTickets(),
+                    getAllCustomers(),
+                    getAllAgent(),
+                ]);
+                setTickets(t?.data ?? []);
+                setCustomerCount(c?.data?.length ?? 0);
+                setAgentCount(a?.data?.length ?? 0);
+            } catch (error) {
+                console.error("Failed to load dashboard", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        load();
+    }, []);
+
+    const countByStatus = (s: string) => tickets.filter((t) => t.status === s).length;
+
+    const stats = [
+        { label: "Total Customers", value: customerCount, color: "text-slate-800" },
+        { label: "Total Agents", value: agentCount, color: "text-slate-800" },
+        { label: "Total Tickets", value: tickets.length, color: "text-slate-800" },
+        { label: "Open Tickets", value: countByStatus("open"), color: "text-orange-600" },
+        { label: "Pending Tickets", value: countByStatus("pending"), color: "text-yellow-600" },
+        { label: "Resolved Tickets", value: countByStatus("resolved"), color: "text-green-600" },
+    ];
+
+    const recentTickets = [...tickets]
+        .sort(
+            (a, b) =>
+                new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
+        )
+        .slice(0, 5);
+
     return (
         <div className="p-8">
-
-            {/* Welcome */}
-            <div className="mb-8">
-                <h2 className="text-2xl font-bold text-slate-800">
-                    Welcome back, Admin 👋
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-500">
-                    Here's what's happening in your support system today.
-                </p>
-            </div>
-
             {/* Statistics */}
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-
-                {/* Customers */}
-                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-slate-500">
-                                Total Customers
-                            </p>
-
-                            <h3 className="mt-2 text-3xl font-bold text-slate-800">
-                                1,248
-                            </h3>
-                        </div>
-
-                        <div className="rounded-lg bg-blue-100 p-3 text-xl">
-                            👥
-                        </div>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {stats.map((s) => (
+                    <div
+                        key={s.label}
+                        className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+                    >
+                        <p className="text-sm text-slate-500">{s.label}</p>
+                        <p className={`mt-2 text-3xl font-bold ${s.color}`}>
+                            {loading ? "-" : s.value.toLocaleString()}
+                        </p>
                     </div>
-
-                    <p className="mt-4 text-xs text-green-600">
-                        ↑ 12.5% from last month
-                    </p>
-                </div>
-
-                {/* Agents */}
-                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-slate-500">
-                                Total Agents
-                            </p>
-
-                            <h3 className="mt-2 text-3xl font-bold text-slate-800">
-                                32
-                            </h3>
-                        </div>
-
-                        <div className="rounded-lg bg-purple-100 p-3 text-xl">
-                            🧑‍💼
-                        </div>
-                    </div>
-
-                    <p className="mt-4 text-xs text-green-600">
-                        26 agents currently active
-                    </p>
-                </div>
-
-                {/* Tickets */}
-                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-slate-500">
-                                Total Tickets
-                            </p>
-
-                            <h3 className="mt-2 text-3xl font-bold text-slate-800">
-                                2,846
-                            </h3>
-                        </div>
-
-                        <div className="rounded-lg bg-orange-100 p-3 text-xl">
-                            🎫
-                        </div>
-                    </div>
-
-                    <p className="mt-4 text-xs text-slate-500">
-                        184 open tickets
-                    </p>
-                </div>
-
-                {/* Resolved */}
-                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-slate-500">
-                                Resolved Tickets
-                            </p>
-
-                            <h3 className="mt-2 text-3xl font-bold text-slate-800">
-                                2,412
-                            </h3>
-                        </div>
-
-                        <div className="rounded-lg bg-green-100 p-3 text-xl">
-                            ✅
-                        </div>
-                    </div>
-
-                    <p className="mt-4 text-xs text-green-600">
-                        84.7% resolution rate
-                    </p>
-                </div>
-
+                ))}
             </div>
 
-            {/* Second Statistics */}
-            <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-
-                <div className="rounded-xl border border-slate-200 bg-white p-5">
-                    <p className="text-sm text-slate-500">
-                        Open Tickets
-                    </p>
-
-                    <p className="mt-2 text-2xl font-bold text-orange-600">
-                        184
-                    </p>
-                </div>
-
-                <div className="rounded-xl border border-slate-200 bg-white p-5">
-                    <p className="text-sm text-slate-500">
-                        Pending Tickets
-                    </p>
-
-                    <p className="mt-2 text-2xl font-bold text-yellow-600">
-                        96
-                    </p>
-                </div>
-
-                <div className="rounded-xl border border-slate-200 bg-white p-5">
-                    <p className="text-sm text-slate-500">
-                        AI Conversations
-                    </p>
-
-                    <p className="mt-2 text-2xl font-bold text-indigo-600">
-                        3,482
-                    </p>
-                </div>
-
-                <div className="rounded-xl border border-slate-200 bg-white p-5">
-                    <p className="text-sm text-slate-500">
-                        Knowledge Documents
-                    </p>
-
-                    <p className="mt-2 text-2xl font-bold text-purple-600">
-                        126
-                    </p>
-                </div>
-
-            </div>
-
-            {/* Main Grid */}
-            <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-3">
-
-                {/* Recent Tickets */}
-                <div className="xl:col-span-2 rounded-xl border border-slate-200 bg-white">
-
-                    <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-
-                        <div>
-                            <h3 className="font-semibold text-slate-800">
-                                Recent Tickets
-                            </h3>
-
-                            <p className="text-xs text-slate-500">
-                                Latest customer support activity
-                            </p>
-                        </div>
-
-                        <Link
-                            href="/admin/tickets"
-                            className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
-                        >
-                            View All
-                        </Link>
-
+            {/* Recent Tickets */}
+            <div className="mt-8 rounded-xl border border-slate-200 bg-white">
+                <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+                    <div>
+                        <h3 className="font-semibold text-slate-800">Recent Tickets</h3>
+                        <p className="text-xs text-slate-500">Latest customer support activity</p>
                     </div>
 
-                    <div className="divide-y divide-slate-100">
+                    <Link
+                        href="/admin/ticket"
+                        className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+                    >
+                        View All
+                    </Link>
+                </div>
 
-                        {tickets.map((ticket) => (
-
+                <div className="divide-y divide-slate-100">
+                    {loading ? (
+                        <p className="px-6 py-8 text-center text-sm text-slate-400">Loading...</p>
+                    ) : recentTickets.length === 0 ? (
+                        <p className="px-6 py-8 text-center text-sm text-slate-400">
+                            No tickets found
+                        </p>
+                    ) : (
+                        recentTickets.map((ticket) => (
                             <Link
-                                href={`/admin/tickets/${ticket.id.replace("#TKT-", "")}`}
-                                key={ticket.id}
+                                href={`/admin/ticket/${ticket._id}`}
+                                key={ticket._id}
                                 className="block px-6 py-4 transition hover:bg-slate-50"
                             >
-
                                 <div className="flex items-center justify-between gap-4">
-
                                     <div className="min-w-0">
-
                                         <div className="flex items-center gap-3">
                                             <span className="text-xs font-semibold text-indigo-600">
-                                                {ticket.id}
+                                                #{ticket._id.slice(-6).toUpperCase()}
                                             </span>
-
                                             <span
-                                                className={`rounded-full px-2 py-1 text-[10px] font-medium ${
-                                                    ticket.status === "Open"
-                                                        ? "bg-blue-100 text-blue-700"
-                                                        : ticket.status === "Pending"
-                                                        ? "bg-yellow-100 text-yellow-700"
-                                                        : "bg-green-100 text-green-700"
+                                                className={`rounded-full px-2 py-1 text-[10px] font-medium capitalize ${
+                                                    statusStyle[ticket.status] ?? "bg-slate-100 text-slate-600"
                                                 }`}
                                             >
                                                 {ticket.status}
@@ -284,295 +146,29 @@ export default function AdminHomePage() {
                                         </h4>
 
                                         <p className="mt-1 text-xs text-slate-500">
-                                            Customer: {ticket.customer} • Agent: {ticket.agent}
+                                            Customer: {fullName(ticket.customerId)} • Agent:{" "}
+                                            {fullName(ticket.assignedAgentId)}
                                         </p>
-
                                     </div>
 
                                     <div className="text-right">
-
                                         <span
-                                            className={`rounded-full px-2 py-1 text-[10px] font-medium ${
-                                                ticket.priority === "High"
-                                                    ? "bg-red-100 text-red-700"
-                                                    : ticket.priority === "Medium"
-                                                    ? "bg-orange-100 text-orange-700"
-                                                    : "bg-slate-100 text-slate-600"
+                                            className={`rounded-full px-2 py-1 text-[10px] font-medium capitalize ${
+                                                priorityStyle[ticket.priority] ?? "bg-slate-100 text-slate-600"
                                             }`}
                                         >
                                             {ticket.priority}
                                         </span>
-
                                         <p className="mt-2 text-xs text-slate-400">
-                                            {ticket.time}
+                                            {timeAgo(ticket.createdAt)}
                                         </p>
-
                                     </div>
-
                                 </div>
-
                             </Link>
-
-                        ))}
-
-                    </div>
-
+                        ))
+                    )}
                 </div>
-
-                {/* Agent Performance */}
-                <div className="rounded-xl border border-slate-200 bg-white">
-
-                    <div className="border-b border-slate-200 px-6 py-4">
-                        <h3 className="font-semibold text-slate-800">
-                            Agent Performance
-                        </h3>
-
-                        <p className="text-xs text-slate-500">
-                            Current workload
-                        </p>
-                    </div>
-
-                    <div className="divide-y divide-slate-100">
-
-                        {agents.map((agent) => (
-
-                            <div
-                                key={agent.email}
-                                className="px-6 py-5"
-                            >
-
-                                <div className="flex items-center justify-between">
-
-                                    <div className="flex items-center gap-3">
-
-                                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 font-semibold text-indigo-600">
-                                            {agent.name.charAt(0)}
-                                        </div>
-
-                                        <div>
-                                            <p className="text-sm font-medium text-slate-800">
-                                                {agent.name}
-                                            </p>
-
-                                            <p className="text-xs text-slate-400">
-                                                {agent.email}
-                                            </p>
-                                        </div>
-
-                                    </div>
-
-                                    <span
-                                        className={`text-xs font-medium ${
-                                            agent.status === "Online"
-                                                ? "text-green-600"
-                                                : "text-slate-400"
-                                        }`}
-                                    >
-                                        ● {agent.status}
-                                    </span>
-
-                                </div>
-
-                                <div className="mt-4 flex justify-between text-xs text-slate-500">
-                                    <span>
-                                        Assigned: {agent.assigned}
-                                    </span>
-
-                                    <span>
-                                        Resolved: {agent.resolved}
-                                    </span>
-                                </div>
-
-                                <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-                                    <div
-                                        className="h-full rounded-full bg-indigo-500"
-                                        style={{
-                                            width: `${(agent.resolved / agent.assigned) * 100}%`,
-                                        }}
-                                    />
-                                </div>
-
-                            </div>
-
-                        ))}
-
-                    </div>
-
-                </div>
-
             </div>
-
-            {/* Bottom Section */}
-            <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
-
-                {/* Ticket Assignment */}
-                <div className="rounded-xl border border-slate-200 bg-white p-6">
-
-                    <div className="flex items-center gap-3">
-                        <div className="rounded-lg bg-blue-100 p-3 text-xl">
-                            🔄
-                        </div>
-
-                        <div>
-                            <h3 className="font-semibold text-slate-800">
-                                Ticket Assignment
-                            </h3>
-
-                            <p className="text-xs text-slate-500">
-                                Manage agent assignments
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="mt-5 space-y-3">
-
-                        <div className="flex justify-between text-sm">
-                            <span className="text-slate-500">
-                                Unassigned
-                            </span>
-
-                            <span className="font-semibold text-red-600">
-                                24
-                            </span>
-                        </div>
-
-                        <div className="flex justify-between text-sm">
-                            <span className="text-slate-500">
-                                Assigned Today
-                            </span>
-
-                            <span className="font-semibold text-slate-800">
-                                67
-                            </span>
-                        </div>
-
-                    </div>
-
-                    <Link
-                        href="/admin/assignment"
-                        className="mt-5 block rounded-lg bg-indigo-600 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-700"
-                    >
-                        Manage Assignment
-                    </Link>
-
-                </div>
-
-                {/* Knowledge Base */}
-                <div className="rounded-xl border border-slate-200 bg-white p-6">
-
-                    <div className="flex items-center gap-3">
-                        <div className="rounded-lg bg-purple-100 p-3 text-xl">
-                            📚
-                        </div>
-
-                        <div>
-                            <h3 className="font-semibold text-slate-800">
-                                Knowledge Base
-                            </h3>
-
-                            <p className="text-xs text-slate-500">
-                                AI knowledge documents
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="mt-5">
-
-                        <p className="text-3xl font-bold text-slate-800">
-                            126
-                        </p>
-
-                        <p className="mt-1 text-xs text-slate-500">
-                            Documents available for AI
-                        </p>
-
-                    </div>
-
-                    <Link
-                        href="/admin/knowledge-base"
-                        className="mt-5 block rounded-lg border border-slate-200 px-4 py-2.5 text-center text-sm font-medium text-slate-700 hover:bg-slate-50"
-                    >
-                        Manage Documents
-                    </Link>
-
-                </div>
-
-                {/* AI Monitoring */}
-                <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-6">
-
-                    <div className="flex items-center gap-3">
-
-                        <div className="rounded-lg bg-indigo-600 p-3 text-xl">
-                            🤖
-                        </div>
-
-                        <div>
-                            <h3 className="font-semibold text-slate-800">
-                                AI Monitoring
-                            </h3>
-
-                            <p className="text-xs text-slate-500">
-                                AI system activity
-                            </p>
-                        </div>
-
-                    </div>
-
-                    <div className="mt-5 grid grid-cols-2 gap-3">
-
-                        <div className="rounded-lg bg-white p-3">
-                            <p className="text-xs text-slate-500">
-                                AI Requests
-                            </p>
-
-                            <p className="mt-1 text-lg font-bold text-slate-800">
-                                3,482
-                            </p>
-                        </div>
-
-                        <div className="rounded-lg bg-white p-3">
-                            <p className="text-xs text-slate-500">
-                                Success Rate
-                            </p>
-
-                            <p className="mt-1 text-lg font-bold text-green-600">
-                                96.8%
-                            </p>
-                        </div>
-
-                        <div className="rounded-lg bg-white p-3">
-                            <p className="text-xs text-slate-500">
-                                Avg Response
-                            </p>
-
-                            <p className="mt-1 text-lg font-bold text-slate-800">
-                                1.8s
-                            </p>
-                        </div>
-
-                        <div className="rounded-lg bg-white p-3">
-                            <p className="text-xs text-slate-500">
-                                Documents Used
-                            </p>
-
-                            <p className="mt-1 text-lg font-bold text-indigo-600">
-                                2,941
-                            </p>
-                        </div>
-
-                    </div>
-
-                    <Link
-                        href="/admin/ai-monitoring"
-                        className="mt-5 block rounded-lg bg-indigo-600 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-700"
-                    >
-                        View AI Monitoring
-                    </Link>
-
-                </div>
-
-            </div>
-
         </div>
     );
 }
