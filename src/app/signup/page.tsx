@@ -31,7 +31,7 @@ export default function RegisterPage() {
             if (res.status === false) toast.error(res.msg);
             if (res.status === true) {
                 toast.success(res.msg);
-                router.push("/login")
+                router.push("/")
             };
         } catch (err) {
             console.log(err);
@@ -187,7 +187,7 @@ export default function RegisterPage() {
                     <p className="mt-7 text-center text-sm text-slate-400">
                         Already have an account?{" "}
                         <Link
-                            href="/login"
+                            href="/"
                             className="font-semibold text-blue-400 transition hover:text-blue-300"
                         >
                             Login

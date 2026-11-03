@@ -24,7 +24,7 @@ export default function LogoutButton({
         }
         disconnectSocket();
         dispatch(logout());
-        router.replace("/login");
+        router.replace("/");
     };
 
     const styles =

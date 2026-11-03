@@ -81,7 +81,7 @@ npm run lint     # lint
 
 ## How Auth Works
 
-Login returns a JWT that is saved in `localStorage` and attached to every API request by the Axios interceptor. The user's role (`user`, `agent`, `admin`) decides which portal they are redirected to. Logout removes the token, disconnects the socket and returns to `/login`.
+Login returns a JWT that is saved in `localStorage` and attached to every API request by the Axios interceptor. The user's role (`user`, `agent`, `admin`) decides which portal they are redirected to. Logout removes the token, disconnects the socket and returns to `/`.
 
 ## Notes
 
